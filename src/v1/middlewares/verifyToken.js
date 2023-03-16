@@ -22,7 +22,7 @@ const decodeToken = (bearerHeader) => {
 exports.verifyToken = (req, res, next) => {
 	const decodedToken = decodeToken(req.headers.authorization);
 	if (decodedToken) {
-		req.userId = decodeToken.id;
+		req.userId = decodedToken.id;
 		next();
 	} else {
 		res.status(401).json(responseHelper(null, 'Unauthorized', false));

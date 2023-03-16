@@ -5,7 +5,7 @@ const addUser = async (username, password) => {
 	try {
 		const cryptedPassword = cryptoJS.AES.encrypt(password, process.env.PASSWORD_SECRET_KEY);
 
-		const user = await User.create(username, cryptedPassword);
+		const user = await User.create({username, password: cryptedPassword});
 
 		return { user };
 	} catch (error) {

@@ -10,29 +10,28 @@ const { verifyToken } = require('../middlewares/verifyToken');
 
 router.post(
 	'/signup',
-	body('username').isLength({ min: 8 }).withMessage(
-		'Username must be at least 8 characters'
-	),
-	body('password').isLength({ min: 8 }).withMessage(
-		'Password must be at least 8 characters'
-	),
-	body('confirmPassword').isLength({ min: 8 }).withMessage(
-		'Confirm password must be at least 8 characters'
-	),
+	body('username')
+		.notEmpty().withMessage('Please fill this field').bail()
+		.isLength({ min: 8 }).withMessage('Username must be at least 8 characters'),
+	body('password')
+		.notEmpty().withMessage('Please fill this field').bail()
+		.isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
+	body('confirmPassword')
+		.notEmpty().withMessage('Please fill this field').bail()
+		.isLength({ min: 8 }).withMessage('Confirm password must be at least 8 characters'),
 	body('confirmPassword').custom((value, { req }) => {
 		if (value !== req.body.password) {
 			throw new Error('Password confirmation does not match password');
 		}
 		return true;
 	}),
-	body('username').custom((value) => {
-		userService.findUserByUsername(value)
+	body('username').custom(async (value) => {
+		return userService.findUserByUsername(value)
 			.then(({ user }) => {
 				if (user) {
 					return Promise.reject('Username already in use');
 				}
 			});
-		return true;
 	}),
 	validate,
 	(req, res) => {
@@ -55,13 +54,14 @@ router.post(
 );
 
 router.post(
-	'/signin',
-	body('username').isLength({ min: 8 }).withMessage(
-		'Username must be at least 8 characters'
-	),
-	body('password').isLength({ min: 8 }).withMessage(
-		'Password must be at least 8 characters'
-	),
+	'/login',
+	body('username')
+		.notEmpty().withMessage('Please fill this field').bail()
+		.isLength({ min: 8 }).withMessage('Username must be at least 8 characters'),
+	body('password')
+		.notEmpty().withMessage('Please fill this field').bail()
+		.isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
+	validate,
 	(req, res) => {
 		const { username, password } = req.body;
 
@@ -94,7 +94,7 @@ router.post(
 );
 
 router.post(
-	'verify-token',
+	'/verify-token',
 	verifyToken,
 	(req, res) => {
 		userService.findUserById(req.userId)
