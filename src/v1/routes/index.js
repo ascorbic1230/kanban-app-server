@@ -1,6 +1,7 @@
 
 const ROUTES_MAP = [
   ['auth', '../controllers/authController'],
+  ['boards', '../controllers/boardController'],
 ]
 
 const routes = (app) => {
