@@ -50,7 +50,7 @@ router.post(
 
 				res.status(201).json(responseHelper({ user, token }, 'Sign up successfully'));
 			})
-			.catch(error => res.status(500).json(error));
+			.catch(error => res.status(500).json(responseHelper(null, error.message, false)));
 	}
 );
 
@@ -90,7 +90,7 @@ router.post(
 
 				res.status(200).json(responseHelper({ token }, 'Sign in successfully'))
 			})
-			.catch(error => res.status(500).json(error));
+			.catch(error => res.status(500).json(responseHelper(null, error.message, false)));
 	}
 );
 

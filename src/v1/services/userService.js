@@ -9,7 +9,7 @@ const addUser = async (username, password) => {
 
 		return { user };
 	} catch (error) {
-		throw new Error(error);
+		throw new Error(error.message);
 	}
 };
 
@@ -19,7 +19,7 @@ const findUserById = async (id) => {
 
 		return { user };
 	} catch (error) {
-		throw new Error(error);
+		throw new Error(error.message);
 	}
 }
 
@@ -29,7 +29,7 @@ const findUserByUsername = async (username) => {
 
 		return { user };
 	} catch (error) {
-		throw new Error(error);
+		throw new Error(error.message);
 	}
 }
 

@@ -12,7 +12,7 @@ const addBoard = async (userId, params = {}) => {
 
 		return { board };
 	} catch (error) {
-		throw new Error(error);
+		throw new Error(error.message);
 	}
 }
 
@@ -23,7 +23,7 @@ const getAllByUserId = async (userId) => {
 
 		return { boards };
 	} catch (error) {
-		throw new Error(error);
+		throw new Error(error.message);
 	}
 }
 
@@ -40,22 +40,74 @@ const getBoardById = async (boardId, userId) => {
 
 		return { board };
 	} catch (error) {
-		throw new Error(error);
+		throw new Error(error.message);
 	}
 }
 
-const updatePosition = async (boards) => {
+const updatePosition = async (boards, userId) => {
 	try {
 		const reversedBoard = boards.reverse();
+
+		const updateQueries = [];
+
 		for (const key in reversedBoard) {
 			const board = reversedBoard[key];
-			await Board.findByIdAndUpdate(
-				board.id,
-				{ $set: { position: key } }
-			);
+			updateQueries.push({
+				updateOne: {
+					filter: { _id: board.id },
+					update: { position: key },
+				},
+			});
 		}
+
+		await Board.bulkWrite(updateQueries);
+
+		const res = await Board.find({ user: userId }).sort('-position');
+
+		return { boards: res };
 	} catch (error) {
-		throw new Error(error);
+		throw new Error(error.message);
+	}
+}
+
+const updateBoard = async ({ boardId, title, description, favourite, icon }, userId) => {
+	try {
+		if (!title) title = 'Untitled';
+		if (!description) description = 'Add description here';
+
+		const currentBoard = await Board.findById(boardId);
+		if (!currentBoard) throw new Error('Board not found');
+
+		const data = { title, description, favourite };
+		if (icon) data.icon = icon;
+		if (favourite !== undefined && currentBoard.favourite !== favourite) {
+			const favourites = await Board.find({
+				user: userId,
+				favourite: true,
+				_id: { $ne: boardId },
+			}).sort('favouritePosition');
+
+			if (favourite) {
+				data.favouritePosition = favourites.length > 0 ? favourites.length > 0 : 0;
+			} else {
+				for (const key in favourites) {
+					const element = favourites[key];
+					await Board.findByIdAndUpdate(
+						element._id,
+						{ $set: { favouritePosition: key } }
+					)
+				}
+			}
+		}
+
+		const board = await Board.findByIdAndUpdate(
+			boardId,
+			{ $set: data }
+		)
+
+		return { board };
+	} catch (error) {
+		throw new Error(error.message);
 	}
 }
 
@@ -63,5 +115,6 @@ module.exports = {
 	addBoard,
 	getAllByUserId,
 	getBoardById,
-	updatePosition, getBoardById
+	updatePosition,
+	updateBoard
 }
