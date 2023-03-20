@@ -72,14 +72,15 @@ const updatePosition = async (boards, userId) => {
 
 const updateBoard = async ({ boardId, title, description, favourite, icon }, userId) => {
 	try {
-		if (!title) title = 'Untitled';
-		if (!description) description = 'Add description here';
-
 		const currentBoard = await Board.findById(boardId);
 		if (!currentBoard) throw new Error('Board not found');
 
-		const data = { title, description, favourite };
+		const data = {};
+		if (title) data.title = title;
+		if (description) data.description = description;
+		if (favourite) data.favourite = favourite;
 		if (icon) data.icon = icon;
+
 		if (favourite !== undefined && currentBoard.favourite !== favourite) {
 			const favourites = await Board.find({
 				user: userId,
