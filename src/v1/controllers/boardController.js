@@ -31,6 +31,18 @@ router.get(
 	}
 )
 
+router.get(
+	'/favourites',
+	verifyToken,
+	(req, res) => {
+		boardService.getAllFavouriteByUserId(req.userId)
+			.then(({ boards }) => {
+				res.status(200).json(responseHelper({ boards }, 'Get all favourite boards successfully'));
+			})
+			.catch((error) => res.status(500).json(responseHelper(null, error.message, false)))
+	}
+)
+
 router.put(
 	'/',
 	verifyToken,
@@ -38,6 +50,18 @@ router.put(
 		boardService.updatePosition(req.body.boards, req.userId)
 			.then(({ boards }) => {
 				res.status(200).json(responseHelper({ boards }, 'Update boards position successfully'));
+			})
+			.catch((error) => res.status(500).json(responseHelper(null, error.message, false)))
+	}
+)
+
+router.put(
+	'/favourites',
+	verifyToken,
+	(req, res) => {
+		boardService.updateFavouritePosition(req.body.boards, req.userId)
+			.then(({ boards }) => {
+				res.status(200).json(responseHelper({ boards }, 'Update favourite boards position successfully'));
 			})
 			.catch((error) => res.status(500).json(responseHelper(null, error.message, false)))
 	}
