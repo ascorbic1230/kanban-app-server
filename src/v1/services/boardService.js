@@ -153,6 +153,57 @@ const updateBoard = async ({ boardId, title, description, favourite, icon }, use
 	}
 }
 
+const deleteBoard = async (boardId, userId) => {
+	try {
+		const sections = await Section.find({ board: boardId });
+		for (const section of sections) {
+			await Task.deleteMany({ section: section.id });
+		}
+		await Section.deleteMany({ board: boardId });
+
+		const currentBoard = await Board.findById(boardId);
+
+		if (currentBoard.favourite) {
+			const favourites = await Board.find({
+				user: userId,
+				favourite: true,
+				_id: { $ne: boardId },
+			}).sort('favouritePosition');
+
+			const updateQueries = [];
+			for (const key in favourites) {
+				const element = favourites[key];
+				updateQueries.push({
+					updateOne: {
+						filter: { _id: element._id },
+						update: { favouritePosition: key }
+					}
+				})
+				await Board.bulkWrite(updateQueries);
+			}
+		}
+
+		await Board.deleteOne({ _id: boardId });
+
+		const boards = await Board.find({ user: userId }).sort('position');
+
+		const updateQueries = [];
+		for (const key in boards) {
+			const board = boards[key];
+			updateQueries.push({
+				updateOne: {
+					filter: { _id: board.id },
+					update: { position: key },
+				},
+			});
+		}
+
+		await Board.bulkWrite(updateQueries);
+	} catch (error) {
+		throw new Error(error.message);
+	}
+}
+
 module.exports = {
 	addBoard,
 	getAllByUserId,
@@ -161,4 +212,5 @@ module.exports = {
 	updatePosition,
 	updateFavouritePosition,
 	updateBoard,
+	deleteBoard,
 }

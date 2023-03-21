@@ -108,4 +108,24 @@ router.put(
 	}
 )
 
+router.delete(
+	'/:boardId',
+	param('boardId').custom((value) => {
+		if (!isObjectId(value)) {
+			return Promise.reject('Invalid id');
+		}
+		return Promise.resolve();
+	}),
+	validate,
+	verifyToken,
+	(req, res) => {
+		const { boardId } = req.params;
+		boardService.deleteBoard(boardId, req.userId)
+			.then(() => {
+				return res.status(200).json(responseHelper(null, 'Delete board successfully'));
+			})
+			.catch((error) => res.status(500).json(responseHelper(null, error.message, false)));
+	}
+)
+
 module.exports = router;
