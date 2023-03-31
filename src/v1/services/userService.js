@@ -3,9 +3,10 @@ const cryptoJS = require('crypto-js');
 
 const addUser = async (username, password) => {
 	try {
+		const avatarUrl = 'https://api.dicebear.com/6.x/bottts-neutral/svg';
 		const cryptedPassword = cryptoJS.AES.encrypt(password, process.env.PASSWORD_SECRET_KEY);
 
-		const user = await User.create({username, password: cryptedPassword});
+		const user = await User.create({ username, password: cryptedPassword, avatarUrl });
 
 		return { user };
 	} catch (error) {
