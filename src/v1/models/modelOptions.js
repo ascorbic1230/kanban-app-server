@@ -5,5 +5,5 @@ exports.schemaOptions = {
 	toObjects: {
 		virtuals: true,
 	},
-	timestamp: true,
+	timestamps: true,
 };
